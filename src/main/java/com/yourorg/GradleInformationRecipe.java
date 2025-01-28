@@ -1,15 +1,13 @@
 package com.yourorg;
 
-import org.openrewrite.ExecutionContext;
-import org.openrewrite.ScanningRecipe;
-import org.openrewrite.Tree;
-import org.openrewrite.TreeVisitor;
+import org.openrewrite.*;
 import org.openrewrite.gradle.marker.GradleProject;
 
 import java.util.Optional;
 
 
-public class GradleInformationRecipe extends ScanningRecipe<GradleInformationRecipe.Accumulator> {
+
+public class GradleInformationRecipe extends Recipe {
 
     @Override
     public String getDisplayName() {
@@ -21,12 +19,12 @@ public class GradleInformationRecipe extends ScanningRecipe<GradleInformationRec
         return "Converts a project from Gradle to Maven.";
     }
 
-    @Override
+    /*@Override
     public Accumulator getInitialValue(ExecutionContext ctx) {
         return new Accumulator();
-    }
+    }*/
 
-    @Override
+    /*@Override
     public TreeVisitor<?, ExecutionContext> getScanner(Accumulator acc) {
         return new TreeVisitor<Tree, ExecutionContext>() {
             @Override
@@ -40,7 +38,39 @@ public class GradleInformationRecipe extends ScanningRecipe<GradleInformationRec
 
                     gp.getConfigurations().forEach(configuration -> {
                         configuration.getRequested().forEach(dependency -> {
-                            System.out.println(String.format("%s:%s:%s\n", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()));
+                            System.out.println(String.format("%s:%s:%s:%s\n", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), dependency.getScope()));
+                        });
+                    });
+
+                    gp.getConfigurations().forEach(configuration -> {
+                        System.out.println(configuration.getName());
+                        if ("dependencyManagement".equals(configuration.getName())) {
+                            configuration.getRequested().forEach(dependency -> {
+                                System.out.println(String.format("%s:%s:%s:%s\n", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), dependency.getScope()));
+                            });
+                        }
+                    });
+
+                }
+
+                return tree;
+            }
+        };
+    }*/
+
+    @Override
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
+        return new TreeVisitor<Tree, ExecutionContext>() {
+            @Override
+            public Tree visit(Tree tree, ExecutionContext ctx) {
+                Optional<GradleProject> maybeGp = tree.getMarkers()
+                        .findFirst(GradleProject.class);
+                if (maybeGp.isPresent()) {
+                    GradleProject gp = maybeGp.get();
+
+                    gp.getConfigurations().forEach(configuration -> {
+                        configuration.getRequested().forEach(dependency -> {
+                            System.out.println(String.format("%s:%s:%s:%s\n", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), dependency.getScope()));
                         });
                     });
 
